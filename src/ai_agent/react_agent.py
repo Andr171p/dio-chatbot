@@ -42,9 +42,10 @@ class ReACTAgent:
 
     async def _compile_graph(self) -> CompiledStateGraph:
         graph = self._build_graph()
-        saver = AsyncSqliteSaver(sqlite3.connect(self._db_url))
-        await saver.setup()
-        compiled_graph = graph.compile()
+        connection = sqlite3.connect(self._db_url)
+        checkpointer = AsyncSqliteSaver(connection)
+        await checkpointer.setup()
+        compiled_graph = graph.compile(checkpointer=checkpointer)
         return compiled_graph
 
     async def stream(self, thread_id: str, query: str) -> Optional[str]:
