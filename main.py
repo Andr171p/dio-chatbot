@@ -1,4 +1,6 @@
-from src.presentation.api.app import get_litestar_app
+import asyncio
+
+from src.presentation.streamlit.app import main
 
 
-app = get_litestar_app()
+asyncio.run(main())

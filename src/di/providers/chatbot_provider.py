@@ -22,7 +22,7 @@ class ChatBotProvider(Provider):
         return ReACTAgent(
             db_url=settings.sqlite.db_path,
             tools=[retrieval_node],
-            prompt_template=read_txt(...),
+            prompt_template=read_txt(settings.prompts.system_path),
             model=model
         )
 

@@ -52,6 +52,7 @@ class YandexGPTSettings(BaseSettings):
 
 
 class PromptsSettings(BaseSettings):
+    system_path: Path = BASE_DIR / "prompts" / "system.txt"
     retrival_description_path: Path = BASE_DIR / "prompts" / "retrieval_description.txt"
 
 

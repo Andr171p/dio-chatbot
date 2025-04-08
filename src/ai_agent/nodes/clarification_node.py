@@ -30,7 +30,7 @@ class ClarificationNode(BaseNode):
         parser = PydanticOutputParser(pydantic_object=Clarification)
         prompt = (
             ChatPromptTemplate
-            .from_messages([("system", read_txt(self._template_path))])
+            .from_messages([("system.txt", read_txt(self._template_path))])
             .partial(format_instructions=parser.get_format_instructions())
         )
         return prompt | self._model | parser
