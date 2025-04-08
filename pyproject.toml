@@ -1,0 +1,16 @@
+[project]
+name = "diomanagerbot"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.13"
+dependencies = [
+    "langchain>=0.3.23",
+    "langchain-community>=0.3.21",
+    "langchain-huggingface>=0.1.2",
+    "langgraph==0.3.5",
+    "langgraph-checkpoint==2.0.21",
+    "langgraph-checkpoint-postgres==2.0.19",
+    "langgraph-checkpoint-sqlite>=2.0.6",
+    "psycopg>=3.2.6",
+    "psycopg-pool>=3.2.6",
+]

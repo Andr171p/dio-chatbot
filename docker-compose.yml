@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+  elastic:
+    image: elasticsearch:8.16.1
+    environment:
+      ES_JAVA_OPTS: "-Xmx512m -Xms512m"
+      ELASTIC_USERNAME: "elastic"
+      ELASTIC_PASSWORD: "password"
+      discovery.type: single-node
+    volumes:
+      - .docker/configs/elasticsearch/config.yml:/usr/share/elasticsearch/docker/config/elasticsearch.yml:ro
+      - elastic-data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./.docker/data:/data
+    command: redis-server --appendonly yes
+    restart: always
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "password"
+      POSTGRES_DB: "database"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: always
+
+volumes:
+  elastic-data:
+  postgres-data:
