@@ -46,6 +46,15 @@ elastic_client = Elasticsearch(
     verify_certs=False
 )
 
+indices = elastic_client.cat.indices(h='index').split()
+
+for index in indices:
+    try:
+        elastic_client.indices.delete(index=index, ignore=[400, 404])
+        print(f"Удалён индекс {index}")
+    except Exception as e:
+        print(f"Произошла ошибка при удалении индекса {index}: {e}")
+
 elastic_store = ElasticsearchStore(
     es_connection=elastic_client,
     index_name="dio-vector-index",
@@ -59,8 +68,8 @@ bm25_retriever = ElasticSearchBM25Retriever(
     index_name="dio-docs-index",
 )
 
-elastic_store.add_documents(documents=chunks)
+'''elastic_store.add_documents(documents=chunks)
 log.info("Документы добавлены в векторное хранилище")
 
 bm25_retriever.add_texts([document.page_content for document in chunks])
-log.info("Документы добавлены в индекс BM25")
+log.info("Документы добавлены в индекс BM25")'''

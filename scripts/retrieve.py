@@ -37,5 +37,5 @@ retriever = EnsembleRetriever(
     weights=[0.6, 0.4]
 )
 
-docs = retriever.invoke("Какие продукты вы предлагаете")
+docs = retriever.invoke("1С:Бухгалтерия")
 print(docs)

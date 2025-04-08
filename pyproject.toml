@@ -19,6 +19,8 @@ dependencies = [
     "psycopg-pool>=3.2.6",
     "streamlit>=1.44.1",
     "transformers>=4.51.0",
+    "unstructured>=0.17.2",
+    "xlrd>=2.0.1",
     "yandex-cloud-ml-sdk>=0.7.0",
     "yandexcloud>=0.337.0",
 ]
