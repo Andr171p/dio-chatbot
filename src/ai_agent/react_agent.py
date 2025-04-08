@@ -9,18 +9,21 @@ from langgraph.graph import START, StateGraph, MessagesState
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 from langgraph.graph.state import CompiledGraph, CompiledStateGraph
 
-from langchain_core.tools import StructuredTool
+# from langchain_core.tools import StructuredTool
+from langchain_core.tools import BaseTool
 from langchain_core.language_models import BaseChatModel, BaseLLM
+
+from src.ai_agent.base_agent import BaseAgent
 
 
 log = logging.getLogger(__name__)
 
 
-class ReACTAgent:
+class ReACTAgent(BaseAgent):
     def __init__(
             self,
             db_url: str,
-            tools: List[StructuredTool],
+            tools: List[BaseTool],
             prompt_template: str,
             model: Union[BaseChatModel, BaseLLM]
     ) -> None:
