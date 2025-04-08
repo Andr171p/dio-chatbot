@@ -10,8 +10,8 @@ from src.settings import settings
 
 
 class RetrievalTool(BaseTool):
-    name = "RetrievalTool"
-    description = read_txt(settings.prompt.retrival_description_path)
+    name: str = "RetrievalTool"
+    description: str = read_txt(settings.prompts.retrival_description_path)
 
     def __init__(self, retriever: BaseRetriever, **kwargs: Any) -> None:
         super().__init__(**kwargs)

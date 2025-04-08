@@ -30,7 +30,9 @@ class PostgresSettings(BaseSettings):
 
 
 class SQLiteSettings(BaseSettings):
-    ...
+    db_path: str = str(BASE_DIR / "db.sqlite3")
+    driver: str = "aiosqlite"
+    url: str = f"sqlite:///{db_path}"
 
 
 class EmbeddingsSettings(BaseSettings):
@@ -56,6 +58,7 @@ class PromptsSettings(BaseSettings):
 class Settings(BaseSettings):
     elasticsearch: ElasticsearchSettings = ElasticsearchSettings()
     postgres: PostgresSettings = PostgresSettings()
+    sqlite: SQLiteSettings = SQLiteSettings()
     embeddings: EmbeddingsSettings = EmbeddingsSettings()
     giga_chat: GigaChatSettings = GigaChatSettings()
     yandex_gpt: YandexGPTSettings = YandexGPTSettings()

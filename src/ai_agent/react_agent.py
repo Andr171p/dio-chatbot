@@ -1,5 +1,5 @@
-import sqlite3
 import logging
+import aiosqlite
 from typing import List, Optional, Union
 
 from langgraph.prebuilt import create_react_agent
@@ -42,7 +42,7 @@ class ReACTAgent:
 
     async def _compile_graph(self) -> CompiledStateGraph:
         graph = self._build_graph()
-        connection = sqlite3.connect(self._db_url)
+        connection = await aiosqlite.connect(self._db_url)
         checkpointer = AsyncSqliteSaver(connection)
         await checkpointer.setup()
         compiled_graph = graph.compile(checkpointer=checkpointer)
