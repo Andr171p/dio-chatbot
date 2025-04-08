@@ -3,11 +3,11 @@ from dishka import Provider, provide, Scope
 from elasticsearch import Elasticsearch
 from langchain_core.embeddings import Embeddings
 from langchain.retrievers import EnsembleRetriever
-from langchain_community.llms.yandex import YandexGPT
 from langchain_elasticsearch import ElasticsearchStore
 from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.chat_models import ChatYandexGPT
 from langchain_core.vectorstores import VectorStoreRetriever
-from langchain_core.language_models import BaseChatModel, BaseLLM
+from langchain_core.language_models import BaseChatModel
 from langchain_community.retrievers import ElasticSearchBM25Retriever
 
 from src.settings import settings
@@ -67,8 +67,8 @@ class LangchainProvider(Provider):
         )
 
     @provide(scope=Scope.APP)
-    def get_model(self) -> BaseChatModel | BaseLLM:
-        return YandexGPT(
+    def get_model(self) -> BaseChatModel:
+        return ChatYandexGPT(
             api_key=settings.yandex_gpt.api_key,
             folder_id=settings.yandex_gpt.folder_id
         )

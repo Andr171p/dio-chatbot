@@ -1,6 +1,4 @@
-def main():
-    print("Hello from diomanagerbot!")
+from src.presentation.api.app import get_litestar_app
 
 
-if __name__ == "__main__":
-    main()
+app = get_litestar_app()

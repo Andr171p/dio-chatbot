@@ -18,7 +18,7 @@ class ChatBotProvider(Provider):
         return RetrievalTool(retriever)
 
     @provide(scope=Scope.APP)
-    def get_react_agent(self, retrieval_node: RetrievalTool, model: BaseChatModel) -> ReACTAgent:
+    def get_react_agent(self, retrieval_node: RetrievalTool, model: BaseChatModel) -> BaseAgent:
         return ReACTAgent(
             db_url=settings.sqlite.db_path,
             tools=[retrieval_node],
