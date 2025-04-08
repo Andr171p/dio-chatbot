@@ -1,3 +1,5 @@
+import logging
+
 from typing import Any
 
 from langchain_core.tools import BaseTool
@@ -9,6 +11,9 @@ from src.misc.file_readers import read_txt
 from src.settings import settings
 
 
+log = logging.getLogger(__name__)
+
+
 class RetrievalTool(BaseTool):
     name: str = "RetrievalTool"
     description: str = read_txt(settings.prompts.retrival_description_path)
@@ -18,11 +23,13 @@ class RetrievalTool(BaseTool):
         self._retriever = retriever
 
     def _run(self, query: str) -> str:
+        log.info("---RETRIEVE---")
         documents = self._retriever.invoke(query)
         context = format_documents(documents)
         return context
 
     async def _arun(self, query: str) -> str:
+        log.info("---RETRIEVE---")
         documents = await self._retriever.ainvoke(query)
         context = format_documents(documents)
         return context

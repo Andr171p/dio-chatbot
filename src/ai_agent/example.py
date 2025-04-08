@@ -1,3 +1,4 @@
+import logging
 import asyncio
 
 from elasticsearch import Elasticsearch
@@ -66,33 +67,23 @@ model = GigaChat(
 async def main() -> None:
     db_url = settings.sqlite.db_path
     print(db_url)
-    retrival_tool = create_retriever_tool(
+    retrieval_tool = create_retriever_tool(
         retriever=retriever,
         name="DIOConsultPricesRetriever",
         description=read_txt(settings.prompts.retrival_description_path)
     )
+    # retrieval_tool = RetrievalTool(retriever)
     prompt_template = """
     **Роль**:
-    Ты менеджер компании ДИО-Консалт, который должен консультировать пользователей по продуктам компании.
-    
-    **Сценарий работы с пользователем**:  
-    - Поддерживать диалог с пользователем и отвечать на вопросы, связанные с продукцией компании ее кейсами и услугами.  
-    - Предоставлять релевантные ответы, используя базу знаний ДИО-Консалт.  
-    
-    **Правила общения**:  
-    - Будь полезным, вежливым и профессиональным.  
-    - Отвечай кратко и понятно, при необходимости уточняйте запросы пользователя.  
-    - Не обсуждай политические и общественные темы.  
-    - Не предоставляй оценок кейсам компании или сравнения с конкурентами.  
-    - Не назначай встречи или консультации напрямую.
+    Ты менеджер компании ДИО-Консалт, который должен консультировать пользователей по продуктам компании 1с.
     """
     agent = ReACTAgent(
         db_url=db_url,
-        tools=[retrival_tool],
+        tools=[retrieval_tool],
         prompt_template=prompt_template,
         model=model
     )
-    thread_id = "1"
+    thread_id = "2"
     while True:
         query = input("User: ")
         if query == "q":
@@ -102,4 +93,5 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     asyncio.run(main())

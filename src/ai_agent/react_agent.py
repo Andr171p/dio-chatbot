@@ -31,7 +31,7 @@ class ReACTAgent:
     def _create_react_agent(self) -> CompiledGraph:
         return create_react_agent(
             tools=self._tools,
-            prompt=self._prompt_template,
+            state_modifier=self._prompt_template,
             model=self._model
         )
 
@@ -55,5 +55,4 @@ class ReACTAgent:
         compiled_graph = await self._compile_graph()
         async for event in compiled_graph.astream(inputs, config=config, stream_mode="values"):
             message = event["messages"][-1]
-            if isinstance(message, AIMessage):
-                print(f"AI: {message.content}")
+            print(message)
