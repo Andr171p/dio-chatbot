@@ -15,6 +15,7 @@ dependencies = [
     "langgraph-checkpoint==2.0.21",
     "langgraph-checkpoint-postgres==2.0.19",
     "langgraph-checkpoint-sqlite>=2.0.6",
+    "litestar>=2.15.2",
     "psycopg>=3.2.6",
     "psycopg-pool>=3.2.6",
     "streamlit>=1.44.1",
