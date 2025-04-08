@@ -4,8 +4,9 @@ from typing import List, Optional, Union
 
 from langgraph.prebuilt import create_react_agent
 from langgraph.graph import START, StateGraph, MessagesState
-from langgraph.graph.state import CompiledGraph, CompiledStateGraph
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
+from langgraph.graph.state import CompiledGraph, CompiledStateGraph
+from langchain_core.messages import AIMessage
 
 from langchain_core.tools import StructuredTool
 from langchain_core.language_models import BaseChatModel, BaseLLM
@@ -54,4 +55,5 @@ class ReACTAgent:
         compiled_graph = await self._compile_graph()
         async for event in compiled_graph.astream(inputs, config=config, stream_mode="values"):
             message = event["messages"][-1]
-            print(message)
+            if isinstance(message, AIMessage):
+                print(f"AI: {message.content}")
