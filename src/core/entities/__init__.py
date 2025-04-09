@@ -1,6 +1,7 @@
 __all__ = (
     "User",
+    "AskingUser",
     "ChattingUser"
 )
 
-from src.core.entities.user import User, ChattingUser
+from src.core.entities.user import User, AskingUser, ChattingUser

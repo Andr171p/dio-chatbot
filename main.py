@@ -1,6 +1,8 @@
-import asyncio
+import logging
 
-from src.presentation.streamlit.app import main
+from src.presentation.api.app import get_fastapi_app
 
 
-asyncio.run(main())
+logging.basicConfig(level=logging.INFO)
+
+app = get_fastapi_app()

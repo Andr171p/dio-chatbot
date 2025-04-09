@@ -58,7 +58,8 @@ class ReACTAgent(BaseAgent):
         inputs = {"messages": [{"role": "human", "content": query}]}
         compiled_graph = await self._build_and_compile_graph()
         response = await compiled_graph.ainvoke(inputs, config=config)
-        return response.get("content")
+        message = response.get("messages")[-1]
+        return message.content
 
     async def stream(self, thread_id: str, query: str) -> AsyncGenerator[str, Any]:
         config = {"configurable": {"thread_id": thread_id}}
