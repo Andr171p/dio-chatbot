@@ -72,6 +72,7 @@ class LangchainProvider(Provider):
         return GigaChat(
             credentials=settings.giga_chat.api_key,
             scope=settings.giga_chat.scope,
+            # model="GigaChat-pro",
             verify_ssl_certs=False,
             profanity_check=False
         )
