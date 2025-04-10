@@ -1,5 +1,3 @@
-import json
-
 import aiohttp
 import requests
 
@@ -12,7 +10,7 @@ from typing import (
 )
 
 from langchain_core.tools import BaseTool
-from langchain_core.callbacks import CallbackManagerForLLMRun
+from langchain_core.callbacks import CallbackManagerForLLMRun, AsyncCallbackManagerForLLMRun
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import (
     AIMessage,
@@ -89,13 +87,11 @@ class YandexGPTChatModel(BaseChatModel):
         **kwargs: Any,
     ) -> ChatResult:
         yandex_messages = get_yandex_messages(messages)
-        print(self._payload(yandex_messages, stop))
         response = requests.post(
             url=self.url,
             headers=self._headers,
             json=self._payload(yandex_messages, stop)
         )
-        print(response.json())
         response.raise_for_status()
         data = response.json()
 
@@ -115,6 +111,16 @@ class YandexGPTChatModel(BaseChatModel):
         )
         generation = ChatGeneration(message=message)
         return ChatResult(generations=[generation])
+
+    def _agenerate(
+        self,
+        messages: list[BaseMessage],
+        stop: Optional[list[str]] = None,
+        run_manager: Optional[AsyncCallbackManagerForLLMRun] = None,
+        **kwargs: Any,
+    ) -> ChatResult:
+        yandex_messages = get_yandex_messages(messages)
+        ...
 
     def bind_tools(
             self,
