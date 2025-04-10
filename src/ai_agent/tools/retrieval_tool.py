@@ -1,7 +1,8 @@
 import logging
 
-from typing import Any
+from typing import Any, Type, Optional
 
+from pydantic import BaseModel, Field
 from langchain_core.tools import BaseTool
 from langchain_core.retrievers import BaseRetriever
 
@@ -14,9 +15,14 @@ from src.settings import settings
 log = logging.getLogger(__name__)
 
 
+class RetrievalToolInput(BaseModel):
+    query: str = Field(..., description="Запрос для поиска релевантных документов")
+
+
 class RetrievalTool(BaseTool):
     name: str = "RetrievalTool"
     description: str = read_txt(settings.prompts.retrival_description_path)
+    args_schema: Optional[Type[BaseModel]] = RetrievalToolInput
 
     def __init__(self, retriever: BaseRetriever, **kwargs: Any) -> None:
         super().__init__(**kwargs)

@@ -1,36 +1,29 @@
+import logging
 import aiohttp
 import requests
 
-from typing import (
-    Any,
-    List,
-    Union,
-    Iterator,
-    Optional
-)
+from typing import Any, List, Union, Optional
 
+from pydantic import Field
 from langchain_core.tools import BaseTool
-from langchain_core.outputs import (
-    ChatGeneration,
-    ChatGenerationChunk,
-    ChatResult
-)
-from langchain_core.messages import (
-    AIMessage,
-    AIMessageChunk,
-    BaseMessage
-)
-from langchain_core.messages.ai import UsageMetadata
+from langchain_core.outputs import ChatResult
+from langchain_core.messages import BaseMessage
 from langchain_core.language_models import BaseChatModel
 from langchain_core.callbacks import CallbackManagerForLLMRun, AsyncCallbackManagerForLLMRun
 
-from pydantic import Field
-
+from src.llms.yandex_gpt.yandex_gpt_tool_caller import YandexGPTToolCaller
 from src.llms.yandex_gpt.consts import AVAILABLE_MODELS
-from src.llms.yandex_gpt.utils import get_yandex_messages
+from src.llms.yandex_gpt.utils import (
+    get_yandex_messages,
+    get_yandex_tools,
+    get_chat_results_from_yandex_gpt_response
+)
 
 
-class YandexGPTChatModel(BaseChatModel):
+log = logging.getLogger(__name__)
+
+
+class YandexGPTChatModel(YandexGPTToolCaller, BaseChatModel):
     model_name: AVAILABLE_MODELS = "yandexgpt-lite"
     url: str = "https://llm.api.cloud.yandex.net/foundationModels/v1/completion"
     folder_id: Optional[str] = None
@@ -42,7 +35,7 @@ class YandexGPTChatModel(BaseChatModel):
         default=None,
         description="Controls which tool is called. Set to 'auto' or a specific tool."
     )
-    tools: Optional[List[dict]] = Field(
+    tools: Optional[List[BaseTool]] = Field(
         default=None,
         description="List of tools available to the model for function calling."
     )
@@ -74,35 +67,18 @@ class YandexGPTChatModel(BaseChatModel):
             "messages": messages
         }
         if self.tools:
-            payload["tools"] = self.tools
+            payload["tools"] = get_yandex_tools(self.tools)
         if stop:
             payload["completionOptions"]["stopSequences"] = stop
         payload.update(kwargs)
         return payload
 
-    @staticmethod
-    def _get_chat_result(data: dict) -> ChatResult:
-        if "result" not in data:
-            raise ValueError("Unexpected response format from YandexGPT API")
-        alternatives = data["result"]["alternatives"]
-        text = alternatives[0].get("message", {}).get("text", "")
-        tool_calls = alternatives[0].get("message", {}).get("toolCallList", {}).get("toolCalls", [])
-        additional_kwargs = {}
-        if tool_calls:
-            additional_kwargs["tool_calls"] = tool_calls
-        message = AIMessage(
-            content=text,
-            additional_kwargs=additional_kwargs
-        )
-        generation = ChatGeneration(message=message)
-        return ChatResult(generations=[generation])
-
-    def _generate(
-        self,
-        messages: list[BaseMessage],
-        stop: Optional[list[str]] = None,
-        run_manager: Optional[CallbackManagerForLLMRun] = None,
-        **kwargs: Any,
+    def _generate_chat_result(
+            self,
+            messages: list[BaseMessage],
+            stop: Optional[list[str]] = None,
+            run_manager: Optional[CallbackManagerForLLMRun] = None,
+            **kwargs: Any,
     ) -> ChatResult:
         yandex_messages = get_yandex_messages(messages)
         response = requests.post(
@@ -113,10 +89,10 @@ class YandexGPTChatModel(BaseChatModel):
         response.raise_for_status()
         data = response.json()
 
-        chat_result = self._get_chat_result(data)
+        chat_result = get_chat_results_from_yandex_gpt_response(data)
         return chat_result
 
-    async def _agenerate(
+    async def _agenerate_chat_result(
         self,
         messages: list[BaseMessage],
         stop: Optional[list[str]] = None,
@@ -126,32 +102,72 @@ class YandexGPTChatModel(BaseChatModel):
         yandex_messages = get_yandex_messages(messages)
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                url=self.url,
-                headers=self._headers,
-                json=self._payload(yandex_messages, stop)
+                    url=self.url,
+                    headers=self._headers,
+                    json=self._payload(yandex_messages, stop)
             ) as response:
                 data = await response.json()
-        chat_result = self._get_chat_result(data)
+        chat_result = get_chat_results_from_yandex_gpt_response(data)
         return chat_result
+
+    def _generate_with_tools(
+            self,
+            messages: List[BaseMessage],
+            stop: Optional[List[str]] = None,
+            run_manager: Optional[CallbackManagerForLLMRun] = None,
+            **kwargs: Any,
+    ) -> ChatResult:
+        chat_result = self._generate_chat_result(messages, stop, run_manager, **kwargs)
+        ai_message = chat_result.generations[0].message
+        if hasattr(ai_message, "tool_calls") and ai_message.tool_calls:
+            tool_message = self._call_tool(ai_message.tool_calls, run_manager)
+            messages_with_calling_tool = messages + [ai_message] + tool_message
+            chat_result = self._generate_chat_result(messages_with_calling_tool, stop, run_manager, **kwargs)
+        return chat_result
+
+    async def _agenerate_with_tools(
+            self,
+            messages: List[BaseMessage],
+            stop: Optional[List[str]] = None,
+            run_manager: Optional[AsyncCallbackManagerForLLMRun] = None,
+            **kwargs: Any,
+    ) -> ChatResult:
+        chat_result = await self._agenerate_chat_result(messages, stop, run_manager, **kwargs)
+        ai_message = chat_result.generations[0].message
+        if hasattr(ai_message, "tool_calls") and ai_message.tool_calls:
+            tool_message = await self._acall_tool(ai_message.tool_calls, run_manager)
+            messages_with_calling_tool = messages + [ai_message] + tool_message
+            chat_result = await self._agenerate_chat_result(messages_with_calling_tool, stop, run_manager, **kwargs)
+        return chat_result
+
+    def _generate(
+        self,
+        messages: list[BaseMessage],
+        stop: Optional[list[str]] = None,
+        run_manager: Optional[CallbackManagerForLLMRun] = None,
+        **kwargs: Any,
+    ) -> ChatResult:
+        if self.tools:
+            return self._generate_with_tools(messages, stop, run_manager, **kwargs)
+        return self._generate_chat_result(messages, stop, run_manager, **kwargs)
+
+    async def _agenerate(
+        self,
+        messages: list[BaseMessage],
+        stop: Optional[list[str]] = None,
+        run_manager: Optional[AsyncCallbackManagerForLLMRun] = None,
+        **kwargs: Any,
+    ) -> ChatResult:
+        if self.tools:
+            return await self._agenerate_with_tools(messages, stop, run_manager, **kwargs)
+        return await self._agenerate_chat_result(messages, stop, run_manager, **kwargs)
 
     def bind_tools(
             self,
             tools: List[Union[dict[str, Any], BaseTool]],
             **kwargs: Any
     ) -> "YandexGPTChatModel":
-        yandex_tools: List[dict[str, Any]] = []
-        for tool in tools:
-            if isinstance(tool, BaseTool):
-                yandex_tools.append({
-                    "function": {
-                        "name": tool.name,
-                        "description": tool.description,
-                        "parameters": tool.args_schema.model_json_schema()
-                    }
-                })
-            else:
-                yandex_tools.append(tool)
-        self.tools = yandex_tools
+        self.tools = tools
         return self
 
     @property

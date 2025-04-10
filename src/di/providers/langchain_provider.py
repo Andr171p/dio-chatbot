@@ -1,15 +1,16 @@
 from dishka import Provider, provide, Scope
 
 from elasticsearch import Elasticsearch
-from langchain_gigachat import GigaChat
+# from langchain_gigachat import GigaChat
 from langchain_core.embeddings import Embeddings
 from langchain.retrievers import EnsembleRetriever
 from langchain_elasticsearch import ElasticsearchStore
 from langchain_huggingface import HuggingFaceEmbeddings
-# from langchain_community.chat_models import ChatYandexGPT
 from langchain_core.vectorstores import VectorStoreRetriever
 from langchain_core.language_models import BaseChatModel
 from langchain_community.retrievers import ElasticSearchBM25Retriever
+
+from src.llms.yandex_gpt import YandexGPTChatModel
 
 from src.settings import settings
 
@@ -67,7 +68,7 @@ class LangchainProvider(Provider):
             weights=[0.6, 0.4]
         )
 
-    @provide(scope=Scope.APP)
+    '''@provide(scope=Scope.APP)
     def get_model(self) -> BaseChatModel:
         return GigaChat(
             credentials=settings.giga_chat.api_key,
@@ -75,4 +76,12 @@ class LangchainProvider(Provider):
             # model="GigaChat-pro",
             verify_ssl_certs=False,
             profanity_check=False
+        )'''
+
+    @provide(scope=Scope.APP)
+    def get_model(self) -> BaseChatModel:
+        return YandexGPTChatModel(
+            folder_id=settings.yandex_gpt.folder_id,
+            api_key=settings.yandex_gpt.api_key,
+            model_name="yandexgpt"
         )

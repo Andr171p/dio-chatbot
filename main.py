@@ -7,39 +7,17 @@ logging.basicConfig(level=logging.INFO)
 
 app = get_fastapi_app()'''
 
+
 import asyncio
 
-from src.settings import settings
-from src.llms.yandex_gpt import YandexGPTChatModel
-
-from langchain_core.tools import BaseTool, tool
-from langchain_core.messages import HumanMessage
-
-
-@tool
-def get_weather(city: str) -> str:
-    """Получить текущую погоду в указанном городе."""
-    return f"Погода в {city}: 25°C, солнечно"
-
-
-model = YandexGPTChatModel(
-    folder_id=settings.yandex_gpt.folder_id,
-    api_key=settings.yandex_gpt.api_key,
-    model_name="yandexgpt"
-)
-
-model_with_tools = model.bind_tools([get_weather])
-
-messages = [
-    HumanMessage(content="Какая погода в Тюмени?")
-]
+from src.core.use_cases import ChatAssistant
+from src.di.container import container
 
 
 async def main() -> None:
-    res = await model_with_tools.ainvoke(messages)
-    print(res)
+    chat_assistant = await container.get(ChatAssistant)
+    answer = await chat_assistant.answer("5", "Какая стоимость МЕТОДИЧЕСКИЕ И ДЕМОНСТРАЦИОННЫЕ МАТЕРИАЛЫ")
+    print(answer)
 
-
-# res = model_with_tools.invoke(messages)
 
 asyncio.run(main())
