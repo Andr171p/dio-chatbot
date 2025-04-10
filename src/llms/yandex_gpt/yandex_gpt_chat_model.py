@@ -79,6 +79,23 @@ class YandexGPTChatModel(BaseChatModel):
         payload.update(kwargs)
         return payload
 
+    @staticmethod
+    def _get_chat_result(data: dict) -> ChatResult:
+        if "result" not in data:
+            raise ValueError("Unexpected response format from YandexGPT API")
+        alternatives = data["result"]["alternatives"]
+        text = alternatives[0].get("message", {}).get("text", "")
+        tool_calls = alternatives[0].get("message", {}).get("toolCallList", {}).get("toolCalls", [])
+        additional_kwargs = {}
+        if tool_calls:
+            additional_kwargs["tool_calls"] = tool_calls
+        message = AIMessage(
+            content=text,
+            additional_kwargs=additional_kwargs
+        )
+        generation = ChatGeneration(message=message)
+        return ChatResult(generations=[generation])
+
     def _generate(
         self,
         messages: list[BaseMessage],
@@ -95,24 +112,10 @@ class YandexGPTChatModel(BaseChatModel):
         response.raise_for_status()
         data = response.json()
 
-        if "result" not in data:
-            raise ValueError("Unexpected response format from YandexGPT API")
-        alternatives = data["result"]["alternatives"]
-        text = alternatives[0].get("message", {}).get("text", "")
-        tool_calls = alternatives[0].get("message", {}).get("toolCallList", {}).get("toolCalls", [])
+        chat_result = self._get_chat_result(data)
+        return chat_result
 
-        additional_kwargs = {}
-        if tool_calls:
-            additional_kwargs["tool_calls"] = tool_calls
-
-        message = AIMessage(
-            content=text,
-            additional_kwargs=additional_kwargs
-        )
-        generation = ChatGeneration(message=message)
-        return ChatResult(generations=[generation])
-
-    def _agenerate(
+    async def _agenerate(
         self,
         messages: list[BaseMessage],
         stop: Optional[list[str]] = None,
@@ -120,7 +123,15 @@ class YandexGPTChatModel(BaseChatModel):
         **kwargs: Any,
     ) -> ChatResult:
         yandex_messages = get_yandex_messages(messages)
-        ...
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                url=self.url,
+                headers=self._headers,
+                json=self._payload(yandex_messages, stop)
+            ) as response:
+                data = await response.json()
+        chat_result = self._get_chat_result(data)
+        return chat_result
 
     def bind_tools(
             self,

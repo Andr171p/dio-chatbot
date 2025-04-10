@@ -7,6 +7,8 @@ logging.basicConfig(level=logging.INFO)
 
 app = get_fastapi_app()'''
 
+import asyncio
+
 from src.settings import settings
 from src.llms.yandex_gpt import YandexGPTChatModel
 
@@ -29,10 +31,15 @@ model = YandexGPTChatModel(
 model_with_tools = model.bind_tools([get_weather])
 
 messages = [
-    HumanMessage(content="Какая погода в Москве?")
+    HumanMessage(content="Какая погода в Тюмени?")
 ]
 
 
-res = model_with_tools.invoke(messages)
+async def main() -> None:
+    res = await model_with_tools.ainvoke(messages)
+    print(res)
 
-print(res)
+
+# res = model_with_tools.invoke(messages)
+
+asyncio.run(main())
