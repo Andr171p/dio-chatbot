@@ -1,8 +1,7 @@
-from typing import Annotated, Literal
+from typing import Literal
 
 
 AVAILABLE_MODELS = Literal[
     "yandexgpt",
-    "yandexgpt-lite",
-    "yandexgpt-pro"
+    "yandexgpt-lite"
 ]

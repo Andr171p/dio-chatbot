@@ -10,19 +10,20 @@ from typing import (
 )
 
 from langchain_core.tools import BaseTool
-from langchain_core.callbacks import CallbackManagerForLLMRun, AsyncCallbackManagerForLLMRun
-from langchain_core.language_models import BaseChatModel
+from langchain_core.outputs import (
+    ChatGeneration,
+    ChatGenerationChunk,
+    ChatResult
+)
 from langchain_core.messages import (
     AIMessage,
     AIMessageChunk,
     BaseMessage
 )
 from langchain_core.messages.ai import UsageMetadata
-from langchain_core.outputs import (
-    ChatGeneration,
-    ChatGenerationChunk,
-    ChatResult
-)
+from langchain_core.language_models import BaseChatModel
+from langchain_core.callbacks import CallbackManagerForLLMRun, AsyncCallbackManagerForLLMRun
+
 from pydantic import Field
 
 from src.llms.yandex_gpt.consts import AVAILABLE_MODELS
