@@ -90,6 +90,7 @@ class YandexGPTChatModel(YandexGPTToolCaller, BaseChatModel):
         data = response.json()
 
         chat_result = get_chat_results_from_yandex_gpt_response(data)
+        print(chat_result)
         return chat_result
 
     async def _agenerate_chat_result(
@@ -100,6 +101,7 @@ class YandexGPTChatModel(YandexGPTToolCaller, BaseChatModel):
         **kwargs: Any,
     ) -> ChatResult:
         yandex_messages = get_yandex_messages(messages)
+        log.info(self._payload(yandex_messages, stop))
         async with aiohttp.ClientSession() as session:
             async with session.post(
                     url=self.url,

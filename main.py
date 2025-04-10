@@ -1,14 +1,14 @@
-'''import logging
+import logging
 
 from src.presentation.api.app import get_fastapi_app
 
 
 logging.basicConfig(level=logging.INFO)
 
-app = get_fastapi_app()'''
+app = get_fastapi_app()
 
 
-import asyncio
+'''import asyncio
 
 from src.core.use_cases import ChatAssistant
 from src.di.container import container
@@ -20,4 +20,4 @@ async def main() -> None:
     print(answer)
 
 
-asyncio.run(main())
+asyncio.run(main())'''
