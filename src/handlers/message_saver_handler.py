@@ -7,7 +7,7 @@ from typing import (
     TypeVar
 )
 
-from src.ai_agent.state import State
+from src.ai_agent.states import State
 
 
 T = TypeVar("T", bound="FinalizeNode")

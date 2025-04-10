@@ -7,7 +7,7 @@ from langchain.prompts import ChatPromptTemplate
 from langchain_core.language_models import BaseChatModel, LLM
 from langchain_core.output_parsers import PydanticOutputParser
 
-from src.ai_agent.state import State
+from src.ai_agent.states import State
 from src.ai_agent.schemas import Clarification
 from src.ai_agent.nodes.base_node import BaseNode
 

@@ -4,7 +4,7 @@ from typing import Any
 
 from langchain_core.retrievers import BaseRetriever
 
-from src.ai_agent.state import State
+from src.ai_agent.states import State
 from src.ai_agent.utils import format_documents
 from src.ai_agent.nodes.base_node import BaseNode
 

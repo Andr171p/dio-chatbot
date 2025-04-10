@@ -2,7 +2,7 @@ import logging
 
 from typing import Any, Optional
 
-from src.ai_agent.state import State
+from src.ai_agent.states import State
 from src.ai_agent.nodes.base_node import BaseNode
 
 from src.services import ChatHistory

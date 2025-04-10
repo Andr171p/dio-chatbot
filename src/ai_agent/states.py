@@ -1,4 +1,8 @@
+from typing import Annotated, Sequence
 from typing_extensions import TypedDict
+
+from langchain_core.messages import BaseMessage
+from langgraph.graph.message import add_messages
 
 
 class State(TypedDict):
@@ -10,3 +14,7 @@ class State(TypedDict):
     context: str
     generation: str
     final_answer: str
+
+
+class MessagesState(TypedDict):
+    messages: Annotated[Sequence[BaseMessage], add_messages]
