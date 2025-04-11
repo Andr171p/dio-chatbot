@@ -90,7 +90,6 @@ class YandexGPTChatModel(YandexGPTToolCaller, BaseChatModel):
         data = response.json()
 
         chat_result = get_chat_results_from_yandex_gpt_response(data)
-        print(chat_result)
         return chat_result
 
     async def _agenerate_chat_result(
