@@ -1,6 +1,7 @@
 from typing import Any, List, Optional
 
 import logging
+import asyncio
 
 import aiohttp
 import requests
@@ -16,21 +17,25 @@ class YandexGPTAPI:
     def __init__(
             self,
             folder_id: str,
-            api_key: str,
+            api_key: Optional[str] = None,
+            iam_token: Optional[str] = None,
             url: Optional[str] = None,
             model: AVAILABLE_MODELS = "yandexgpt-lite",
             temperature: Optional[float] = None,
             max_tokens: Optional[int] = None,
             tools: Optional[dict[str, Any]] = None,
+            stream: bool = False,
             timeout: Optional[int] = None
     ) -> None:
         self._folder_id = folder_id
         self._api_key = api_key
+        self._iam_token = iam_token
         self._url = url
         self._model = model
         self._temperature = temperature
         self._max_tokens = max_tokens
         self._tools = tools
+        self._stream = stream
         self._timeout = timeout
 
     @property
@@ -39,11 +44,15 @@ class YandexGPTAPI:
 
     @property
     def _headers(self) -> dict[str, Any]:
-        return {
+        headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Api-Key {self._api_key}",
             "x-folder-id": self._folder_id
         }
+        if self._api_key:
+            headers["Authorization"] = f"Api-Key {self._api_key}"
+        elif self._iam_token:
+            headers["Authorization"] = f"Bearer {self._iam_token}"
+        return headers
 
     def _payload(
             self,
@@ -53,6 +62,7 @@ class YandexGPTAPI:
         payload = {
             "modelUri": self._model_uri,
             "completionOptions": {
+                "stream": self._stream,
                 "temperature": self._temperature,
                 "maxTokens": self._max_tokens
             },
@@ -101,3 +111,44 @@ class YandexGPTAPI:
         except aiohttp.ClientError as ex:
             logger.error("YandexGPT api error %s", ex)
             raise YandexGPTAPIException(ex)
+
+    async def _send_async_request(
+            self,
+            messages: List[dict[str, str]],
+            stop: Optional[List[str]] = None,
+            async_timeout: float = 0.5
+    ) -> Optional[dict[str, str]]:
+        if not self._iam_token:
+            raise YandexGPTAPIException("IAM-TOKEN is required")
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    url=self._url,
+                    headers=self._headers,
+                    json=self._payload(messages, stop)
+                ) as response:
+                    data = await response.json()
+            operation_id = data["id"]
+            done = data["done"]
+            while done is False:
+                status_operation = await self._get_status_operation(operation_id)
+                await asyncio.sleep(async_timeout)
+                done = status_operation["done"]
+                logger.info("Status operation is %s", done)
+                if done is True:
+                    return status_operation
+        except aiohttp.ClientError as ex:
+            logger.error("Error while send async request to YandexGPT: %s", ex)
+
+    async def _get_status_operation(self, operation_id: str) -> Optional[dict[str, Any]]:
+        try:
+            url = f"{self._url}/{operation_id}"
+            headers = {"Authorization": f"Bearer {self._iam_token}"}
+            async with aiohttp.ClientSession() as session:
+                async with session.get(
+                    url=url,
+                    headers=headers
+                ) as response:
+                    return await response.json()
+        except aiohttp.ClientError as ex:
+            logger.error("Error while get status of operation: %s", ex)
