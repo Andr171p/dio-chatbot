@@ -1,0 +1,4 @@
+
+
+class YandexGPTAPIException(Exception):
+    pass
