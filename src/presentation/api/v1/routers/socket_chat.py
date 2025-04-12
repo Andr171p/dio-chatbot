@@ -2,7 +2,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from dishka.integrations.fastapi import FromDishka, DishkaRoute, inject
 
 from src.core.use_cases import ChatAssistant
-from src.presentation.api.v1.models import ChatResponse
+from src.presentation.api.v1.schemas import ChatResponse
 from src.services.connection_managers import BaseConnectionManager
 
 
@@ -25,10 +25,10 @@ async def chat(
     try:
         while True:
             user_message = await websocket.receive_text()
-            user_response = ChatResponse(role="User", message=user_message)
+            user_response = ChatResponse(role="user", message=user_message)
             await connection_manager.send(chat_id, user_response)
             assistant_message = await chat_assistant.answer(chat_id, user_message)
-            assistant_response = ChatResponse(role="AI", message=assistant_message)
+            assistant_response = ChatResponse(role="assistant", message=assistant_message)
             await connection_manager.send(chat_id, assistant_response)
     except WebSocketDisconnect:
         await connection_manager.disconnect(chat_id)

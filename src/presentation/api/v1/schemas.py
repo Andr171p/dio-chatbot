@@ -4,5 +4,5 @@ from pydantic import BaseModel
 
 
 class ChatResponse(BaseModel):
-    role: Literal["User", "AI"]
+    role: Literal["user", "assistant"] = "user"
     message: str

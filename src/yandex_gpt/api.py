@@ -7,6 +7,7 @@ import asyncio
 import aiohttp
 import requests
 
+from src.yandex_gpt.utils import convert_tools
 from src.yandex_gpt.constants import AVAILABLE_MODELS
 from src.yandex_gpt.exceptions import YandexGPTAPIException
 
@@ -75,6 +76,7 @@ class YandexGPTAPI:
             payload["tools"] = self._tools
         if stop:
             payload["completionOptions"]["stopSequences"] = stop
+        print(payload)
         return payload
 
     def complete(

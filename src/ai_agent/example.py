@@ -3,16 +3,17 @@ import asyncio
 
 from elasticsearch import Elasticsearch
 from langchain.retrievers import EnsembleRetriever
-from langchain_community.llms.yandex import YandexGPT
 from langchain_elasticsearch import ElasticsearchStore
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.retrievers import ElasticSearchBM25Retriever
+from langchain_community.chat_models import ChatYandexGPT
 from langchain_gigachat import GigaChat
 from langchain.tools.retriever import create_retriever_tool
 
 from src.ai_agent.tools import RetrievalTool
 from src.ai_agent.react_agent import ReACTAgent
 
+from src.yandex_gpt.chat_model import YandexGPTChatModel
 from src.misc.file_readers import read_txt
 from src.settings import settings
 
@@ -51,18 +52,25 @@ retriever = EnsembleRetriever(
     weights=[0.6, 0.4]
 )
 
-'''model = YandexGPT(
+'''model = YandexGPTChatModel(
     api_key=settings.yandex_gpt.api_key,
-    folder_id=settings.yandex_gpt.folder_id
+    folder_id=settings.yandex_gpt.folder_id,
+    model="yandexgpt"
 )'''
 
-model = GigaChat(
+model = ChatYandexGPT(
+    api_key=settings.yandex_gpt.api_key,
+    folder_id=settings.yandex_gpt.folder_id,
+    model_name="yandexgpt"
+)
+
+'''model = GigaChat(
     credentials=settings.giga_chat.api_key,
     scope=settings.giga_chat.scope,
     verify_ssl_certs=False,
     profanity_check=False,
     model="GigaChat:latest"
-)
+)'''
 
 
 async def main() -> None:
@@ -84,7 +92,7 @@ async def main() -> None:
         prompt_template=prompt_template,
         model=model
     )
-    thread_id = "2"
+    thread_id = "10"
     while True:
         query = input("User: ")
         if query == "q":
