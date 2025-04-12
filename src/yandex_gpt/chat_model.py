@@ -25,16 +25,10 @@ class YandexGPTChatModel(_BaseYandexGPT, BaseChatModel):
         **kwargs: Any,
     ) -> ChatResult:
         response = self._yandex_gpt_api.complete(create_messages(messages), stop)
-        from pprint import pprint
-        pprint(response)
         chat_result = create_chat_result(response)
         if self.tools:
             ai_message = chat_result.generations[0].message
-            print(ai_message)
-            # if hasattr(ai_message, "tool_calls") and ai_message.tool_calls:
-            print("++++++++++++++++++")
             tool_message = self._call_tool(ai_message.additional_kwargs.get("tool_calls"))
-            print(tool_message)
             generation = ChatGeneration(message=tool_message[0])
             chat_result = ChatResult(generations=[generation])
         return chat_result
@@ -50,11 +44,9 @@ class YandexGPTChatModel(_BaseYandexGPT, BaseChatModel):
         chat_result = create_chat_result(response)
         if self.tools:
             ai_message = chat_result.generations[0].message
-            if hasattr(ai_message, "tool_calls") and ai_message.tool_calls:
-                tool_message = await self._acall_tool(ai_message.tool_calls)
-                messages_with_calling_tools = messages + [ai_message] + tool_message
-                response = await self._yandex_gpt_api.acomplete(create_messages(messages_with_calling_tools), stop)
-                chat_result = create_chat_result(response)
+            tool_message = await self._acall_tool(ai_message.additional_kwargs.get("tool_calls"))
+            generation = ChatGeneration(message=tool_message[0])
+            chat_result = ChatResult(generations=[generation])
         return chat_result
 
     def bind_tools(self, tools: List[BaseTool], **kwargs: Any) -> "YandexGPTChatModel":
@@ -63,10 +55,6 @@ class YandexGPTChatModel(_BaseYandexGPT, BaseChatModel):
 
     def _call_tool(self, tool_calls: List[dict]) -> List[ToolMessage]:
         tool_messages: List[ToolMessage] = []
-        print("===================")
-        print(self._available_tools)
-        print("===================")
-        print(tool_calls)
         for tool_call in tool_calls:
             tool_name: str = tool_call["functionCall"]["name"]
             tool_args: dict[str, Any] = tool_call["functionCall"].get("arguments")
@@ -100,25 +88,3 @@ class YandexGPTChatModel(_BaseYandexGPT, BaseChatModel):
                     )
                 )
         return tool_messages
-
-
-from src.settings import settings
-from src.yandex_gpt.constants import URL
-from langchain_core.tools import tool
-
-
-@tool
-def multiply(a: int, b: int) -> int:
-    """Multiply a and b."""
-    return a * b
-
-
-model = YandexGPTChatModel(
-    url=URL,
-    model="yandexgpt",
-    folder_id=settings.yandex_gpt.folder_id,
-    api_key=settings.yandex_gpt.api_key
-)
-model.bind_tools([multiply])
-res = model.invoke("Я делаю домашнее задание и не могу умножить 5000 * 45, помоги мне")
-print(res)
