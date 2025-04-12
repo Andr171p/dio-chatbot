@@ -1,5 +1,6 @@
 from typing import Any, List, Optional
 
+import time
 import logging
 import asyncio
 
@@ -77,7 +78,25 @@ class YandexGPTAPI:
     def complete(
             self,
             messages: List[dict[str, str]],
-            stop: Optional[list[str]] = None
+            stop: Optional[List[str]] = None
+    ) -> Optional[dict[str, Any]]:
+        if self._iam_token:
+            return self._send_async_request(messages, stop)
+        return self._send_request(messages, stop)
+
+    async def acomplete(
+            self,
+            messages: List[dict[str, str]],
+            stop: Optional[List[str]] = None
+    ) -> Optional[dict[str, Any]]:
+        if self._iam_token:
+            return await self._asend_async_request(messages, stop)
+        return await self._asend_request(messages, stop)
+
+    def _send_request(
+            self,
+            messages: List[dict[str, str]],
+            stop: Optional[List[str]] = None
     ) -> Optional[dict[str, Any]]:
         try:
             with requests.Session() as session:
@@ -90,14 +109,14 @@ class YandexGPTAPI:
                 response.raise_for_status()
                 return response.json()
         except requests.RequestException as ex:
-            logger.error("YandexGPT api error %s", ex)
+            logger.error("YandexGPTAPI while send request error %s", ex)
             raise YandexGPTAPIException(ex)
 
-    async def async_complete(
+    async def _asend_request(
             self,
             messages: List[dict[str, str]],
             stop: Optional[List[str]] = None
-    ) -> dict[str, Any]:
+    ) -> Optional[dict[str, Any]]:
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.post(
@@ -109,10 +128,38 @@ class YandexGPTAPI:
                     response.raise_for_status()
                     return await response.json()
         except aiohttp.ClientError as ex:
-            logger.error("YandexGPT api error %s", ex)
+            logger.error("YandexGPTAPI while send request error %s", ex)
             raise YandexGPTAPIException(ex)
 
-    async def _send_async_request(
+    def _send_async_request(
+            self,
+            messages: List[dict[str, str]],
+            stop: Optional[List[str]] = None,
+            async_timeout: float = 0.5
+    ) -> Optional[dict[str, Any]]:
+        if not self._iam_token:
+            raise YandexGPTAPIException("IAM-TOKEN is required")
+        try:
+            with requests.Session() as session:
+                response = session.post(
+                    url=self._url,
+                    headers=self._headers,
+                    json=self._payload(messages, stop)
+                )
+                data = response.json()
+            operation_id: str = data["id"]
+            done: bool = data["done"]
+            while done is False:
+                status_operation = self._get_status_operation(operation_id)
+                time.sleep(async_timeout)
+                done: bool = status_operation["done"]
+                logger.info("Status operation is %s", done)
+                if done is True:
+                    return status_operation
+        except requests.RequestException as ex:
+            logger.error("YandexGPTAPI error while send async request: %s", ex)
+
+    async def _asend_async_request(
             self,
             messages: List[dict[str, str]],
             stop: Optional[List[str]] = None,
@@ -128,10 +175,10 @@ class YandexGPTAPI:
                     json=self._payload(messages, stop)
                 ) as response:
                     data = await response.json()
-            operation_id = data["id"]
-            done = data["done"]
+            operation_id: str = data["id"]
+            done: bool = data["done"]
             while done is False:
-                status_operation = await self._get_status_operation(operation_id)
+                status_operation = await self._aget_status_operation(operation_id)
                 await asyncio.sleep(async_timeout)
                 done = status_operation["done"]
                 logger.info("Status operation is %s", done)
@@ -139,16 +186,26 @@ class YandexGPTAPI:
                     return status_operation
         except aiohttp.ClientError as ex:
             logger.error("Error while send async request to YandexGPT: %s", ex)
+            raise YandexGPTAPIException(ex)
 
-    async def _get_status_operation(self, operation_id: str) -> Optional[dict[str, Any]]:
+    def _get_status_operation(self, operation_id: str) -> Optional[dict[str, Any]]:
+        try:
+            url = f"{self._url}/{operation_id}"
+            headers = {"Authorization": f"Bearer {self._iam_token}"}
+            with requests.Session() as session:
+                response = session.get(url=url, headers=headers)
+                return response.json()
+        except requests.RequestException as ex:
+            logger.error("Error while get status of operation: %s", ex)
+            raise YandexGPTAPIException(ex)
+
+    async def _aget_status_operation(self, operation_id: str) -> Optional[dict[str, Any]]:
         try:
             url = f"{self._url}/{operation_id}"
             headers = {"Authorization": f"Bearer {self._iam_token}"}
             async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    url=url,
-                    headers=headers
-                ) as response:
+                async with session.get(url=url, headers=headers) as response:
                     return await response.json()
         except aiohttp.ClientError as ex:
             logger.error("Error while get status of operation: %s", ex)
+            raise YandexGPTAPIException(ex)
