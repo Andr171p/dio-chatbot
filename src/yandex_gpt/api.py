@@ -53,6 +53,8 @@ class YandexGPTAPI:
             headers["Authorization"] = f"Api-Key {self._api_key}"
         elif self._iam_token:
             headers["Authorization"] = f"Bearer {self._iam_token}"
+        else:
+            raise ValueError("IAM-TOKEN or API-KEY is not set")
         return headers
 
     def _payload(
@@ -148,8 +150,7 @@ class YandexGPTAPI:
                 )
                 data = response.json()
             operation_id: str = data["id"]
-            done: bool = data["done"]
-            while done is False:
+            while True:
                 status_operation = self._get_status_operation(operation_id)
                 time.sleep(async_timeout)
                 done: bool = status_operation["done"]
@@ -176,8 +177,7 @@ class YandexGPTAPI:
                 ) as response:
                     data = await response.json()
             operation_id: str = data["id"]
-            done: bool = data["done"]
-            while done is False:
+            while True:
                 status_operation = await self._aget_status_operation(operation_id)
                 await asyncio.sleep(async_timeout)
                 done = status_operation["done"]
