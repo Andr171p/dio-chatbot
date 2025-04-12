@@ -1,14 +1,16 @@
 from __future__ import annotations
 
 from typing import Any, List, Optional, Union
+from functools import cached_property
 
 from pydantic import Field
 
 from langchain_core.tools import BaseTool
 from langchain_core.load.serializable import Serializable
 
-from src.yandex_gpt.constants import AVAILABLE_MODELS, URL
+from src.yandex_gpt.api import YandexGPTAPI
 from src.yandex_gpt.utils import create_tools
+from src.yandex_gpt.constants import AVAILABLE_MODELS, URL
 
 
 class _BaseYandexGPT(Serializable):
@@ -44,7 +46,7 @@ class _BaseYandexGPT(Serializable):
 
     @property
     def model_uri(self) -> str:
-        return f"gpt://{self.folder_id}/{self.model_name}"
+        return f"gpt://{self.folder_id}/{self.model}"
 
     @property
     def _headers(self) -> dict[str, str]:
@@ -74,3 +76,20 @@ class _BaseYandexGPT(Serializable):
             payload["completionOptions"]["stopSequences"] = stop
         payload.update(kwargs)
         return payload
+
+    @property
+    def _available_tools(self) -> dict[str, BaseTool]:
+        return {tool.name: tool for tool in self.tools}
+
+    @cached_property
+    def _yandex_gpt_api(self) -> YandexGPTAPI:
+        return YandexGPTAPI(
+            url=self.url,
+            model=self.model,
+            folder_id=self.folder_id,
+            api_key=self.api_key,
+            iam_token=self.iam_token,
+            max_tokens=self.max_tokens,
+            temperature=self.temperature,
+            tools=create_tools(self.tools) if self.tools else None
+        )

@@ -24,7 +24,7 @@ class YandexGPTAPI:
             model: AVAILABLE_MODELS = "yandexgpt-lite",
             temperature: Optional[float] = None,
             max_tokens: Optional[int] = None,
-            tools: Optional[dict[str, Any]] = None,
+            tools: Optional[List[dict[str, Any]]] = None,
             stream: bool = False,
             timeout: Optional[int] = None
     ) -> None:
