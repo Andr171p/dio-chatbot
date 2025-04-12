@@ -8,7 +8,7 @@ from langchain_core.tools import BaseTool
 from langchain_core.load.serializable import Serializable
 
 from src.yandex_gpt.constants import AVAILABLE_MODELS, URL
-from src.yandex_gpt.utils import get_tools
+from src.yandex_gpt.utils import create_tools
 
 
 class _BaseYandexGPT(Serializable):
@@ -16,6 +16,7 @@ class _BaseYandexGPT(Serializable):
     url: str = URL
     folder_id: Optional[str] = None
     api_key: Optional[str] = None
+    iam_token: Optional[str] = None
     temperature: Optional[float] = None
     max_tokens: Optional[int] = None
     timeout: Optional[int] = None
@@ -68,7 +69,7 @@ class _BaseYandexGPT(Serializable):
             "messages": messages
         }
         if self.tools:
-            payload["tools"] = get_tools(self.tools)
+            payload["tools"] = create_tools(self.tools)
         if stop:
             payload["completionOptions"]["stopSequences"] = stop
         payload.update(kwargs)

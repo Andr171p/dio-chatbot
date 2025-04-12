@@ -61,6 +61,7 @@ model = GigaChat(
     scope=settings.giga_chat.scope,
     verify_ssl_certs=False,
     profanity_check=False,
+    model="GigaChat:latest"
 )
 
 
@@ -88,7 +89,8 @@ async def main() -> None:
         query = input("User: ")
         if query == "q":
             break
-        await agent.stream(thread_id, query)
+        message = await agent.generate(thread_id, query)
+        print(message)
         await asyncio.sleep(0.1)
 
 

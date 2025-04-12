@@ -58,6 +58,7 @@ class ReACTAgent(BaseAgent):
         inputs = {"messages": [{"role": "human", "content": query}]}
         compiled_graph = await self._build_and_compile_graph()
         response = await compiled_graph.ainvoke(inputs, config=config)
+        print(response)
         message = response.get("messages")[-1]
         return message.content
 
