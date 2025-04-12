@@ -1,6 +1,10 @@
 from typing import Any, List, Optional
 
 from langchain_core.tools import BaseTool
+from langchain_core.outputs import (
+    ChatResult,
+    ChatGeneration
+)
 from langchain_core.messages import (
     BaseMessage,
     SystemMessage,
@@ -44,3 +48,23 @@ def __create_message(message: BaseMessage) -> dict[str, str]:
 
 def create_messages(messages: List[BaseMessage]) -> List[dict[str, str]]:
     return [__create_message(message) for message in messages]
+
+
+def create_chat_result(response: dict[str, Any]) -> ChatResult:
+    generations: List[ChatGeneration] = []
+    if "result" not in response:
+        raise ValueError("Unexpected response format from YandexGPT API")
+    alternatives = response["result"]["alternatives"]
+    for alternative in alternatives:
+        text = alternative.get("message", {}).get("text", "")
+        tool_calls = alternative.get("message", {}).get("toolCallList", {}).get("toolCalls", [])
+        additional_kwargs = {}
+        if tool_calls:
+            additional_kwargs["tool_calls"] = tool_calls
+        message = AIMessage(
+            content=text,
+            additional_kwargs=additional_kwargs
+        )
+        generation = ChatGeneration(message=message)
+        generations.append(generation)
+    return ChatResult(generations=generations)
