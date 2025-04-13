@@ -6,13 +6,11 @@ from langchain.retrievers import EnsembleRetriever
 from langchain_elasticsearch import ElasticsearchStore
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.retrievers import ElasticSearchBM25Retriever
-from langchain.tools.retriever import create_retriever_tool
 
 from src.ai_agent.react_agent import ReACTAgent
 
 from src.llms.yandex_gpt import YandexGPTChatModel
 from src.ai_agent.tools import RetrievalTool
-from src.misc.file_readers import read_txt
 from src.settings import settings
 
 

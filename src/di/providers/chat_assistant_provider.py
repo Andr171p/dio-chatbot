@@ -5,7 +5,6 @@ from langchain_core.language_models import BaseChatModel
 from langchain.tools.retriever import create_retriever_tool
 from langchain.tools import Tool
 
-from src.ai_agent.tools import RetrievalTool
 from src.ai_agent import BaseAgent, ReACTAgent
 
 from src.core.use_cases import ChatAssistant
