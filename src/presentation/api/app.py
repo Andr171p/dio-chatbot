@@ -5,14 +5,14 @@ from dishka.integrations.fastapi import setup_dishka
 from src.di.container import container
 from src.presentation.api.v1.routers import (
     chat_router,
-    chat_socket_router
+    socket_chat_router
 )
 
 
 def get_fastapi_app() -> FastAPI:
     app = FastAPI()
     app.include_router(chat_router)
-    app.include_router(chat_socket_router)
+    app.include_router(socket_chat_router)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
