@@ -8,9 +8,9 @@ from pydantic import Field
 from langchain_core.tools import BaseTool
 from langchain_core.load.serializable import Serializable
 
-from src.yandex_gpt.api import YandexGPTAPI
-from src.yandex_gpt.utils import create_tools
-from src.yandex_gpt.constants import AVAILABLE_MODELS, URL
+from src.llms.yandex_gpt.api import YandexGPTAPI
+from src.llms.yandex_gpt.utils import create_tools
+from src.llms.yandex_gpt.constants import AVAILABLE_MODELS, URL
 
 
 class _BaseYandexGPT(Serializable):

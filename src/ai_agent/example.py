@@ -6,14 +6,12 @@ from langchain.retrievers import EnsembleRetriever
 from langchain_elasticsearch import ElasticsearchStore
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.retrievers import ElasticSearchBM25Retriever
-from langchain_community.chat_models import ChatYandexGPT
-from langchain_gigachat import GigaChat
 from langchain.tools.retriever import create_retriever_tool
 
-from src.ai_agent.tools import RetrievalTool
 from src.ai_agent.react_agent import ReACTAgent
 
-from src.yandex_gpt.chat_model import YandexGPTChatModel
+from src.llms.yandex_gpt import YandexGPTChatModel
+from src.ai_agent.tools import RetrievalTool
 from src.misc.file_readers import read_txt
 from src.settings import settings
 
@@ -52,36 +50,22 @@ retriever = EnsembleRetriever(
     weights=[0.6, 0.4]
 )
 
-'''model = YandexGPTChatModel(
+model = YandexGPTChatModel(
     api_key=settings.yandex_gpt.api_key,
     folder_id=settings.yandex_gpt.folder_id,
     model="yandexgpt"
-)'''
-
-model = ChatYandexGPT(
-    api_key=settings.yandex_gpt.api_key,
-    folder_id=settings.yandex_gpt.folder_id,
-    model_name="yandexgpt"
 )
-
-'''model = GigaChat(
-    credentials=settings.giga_chat.api_key,
-    scope=settings.giga_chat.scope,
-    verify_ssl_certs=False,
-    profanity_check=False,
-    model="GigaChat:latest"
-)'''
 
 
 async def main() -> None:
     db_url = settings.sqlite.db_path
     print(db_url)
-    retrieval_tool = create_retriever_tool(
+    '''retrieval_tool = create_retriever_tool(
         retriever=retriever,
         name="DIOConsultPricesRetriever",
         description=read_txt(settings.prompts.retrival_description_path)
-    )
-    # retrieval_tool = RetrievalTool(retriever)
+    )'''
+    retrieval_tool = RetrievalTool(retriever)
     prompt_template = """
     **Роль**:
     Ты менеджер компании ДИО-Консалт, который должен консультировать пользователей по продуктам компании 1с.
@@ -92,7 +76,7 @@ async def main() -> None:
         prompt_template=prompt_template,
         model=model
     )
-    thread_id = "10"
+    thread_id = "19"
     while True:
         query = input("User: ")
         if query == "q":

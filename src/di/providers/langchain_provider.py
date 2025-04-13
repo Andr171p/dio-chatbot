@@ -10,7 +10,7 @@ from langchain_core.vectorstores import VectorStoreRetriever
 from langchain_core.language_models import BaseChatModel
 from langchain_community.retrievers import ElasticSearchBM25Retriever
 
-from src.yandex_gpt.chat_model import YandexGPTChatModel
+from src.llms.yandex_gpt import YandexGPTChatModel
 
 from src.settings import settings
 
