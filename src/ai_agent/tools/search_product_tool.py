@@ -13,6 +13,14 @@ from langchain_core.tools import BaseTool
 logger = logging.getLogger(__name__)
 
 
+def format_search_product(product: dict) -> str:
+    return (
+        f"Артикул: {product["Код"]}\n"
+        f"Наименование: {product["Наименование"]}\n"
+        f"Цена: {product["Рекомендованная цена"]} руб."
+    )
+
+
 class SearchProductToolArgs(BaseModel):
     article_number: str = Field(..., description="Номер артикула")
 
@@ -26,14 +34,15 @@ class SearchProductTool(BaseTool):
         super().__init__(**kwargs)
         self._df = pd.read_csv(file_path)
 
-    def _search_by_article_number(self, article_number: str) -> dict:
-        result: pd.DataFrame = self._df.loc[self._df["Код"] == article_number]
-        return result.iloc[0].to_dict() if not result.empty else {}
+    def _search_by_article_number(self, article_number: str) -> str:
+        product_df: pd.DataFrame = self._df.loc[self._df["Код"] == article_number]
+        product_dict = product_df.iloc[0].to_dict() if not product_df.empty else {}
+        return format_search_product(product_dict)
 
-    def _run(self, article_number: str) -> dict:
+    def _run(self, article_number: str) -> str:
         logger.info("---SEARCH PRODUCT---")
         return self._search_by_article_number(article_number)
 
-    async def _arun(self, article_number: str) -> dict:
+    async def _arun(self, article_number: str) -> str:
         logger.info("---SEARCH PRODUCT---")
         return self._search_by_article_number(article_number)

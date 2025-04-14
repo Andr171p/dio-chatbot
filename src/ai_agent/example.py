@@ -10,8 +10,9 @@ from langchain_community.retrievers import ElasticSearchBM25Retriever
 from src.ai_agent.react_agent import ReACTAgent
 
 from src.llms.yandex_gpt import YandexGPTChatModel
-from src.ai_agent.tools import RetrievalTool
-from src.settings import settings
+from src.ai_agent.tools import RetrievalTool, SearchProductTool
+from src.misc.files import read_txt
+from src.settings import settings, BASE_DIR
 
 
 embeddings = HuggingFaceEmbeddings(
@@ -56,25 +57,19 @@ model = YandexGPTChatModel(
 
 
 async def main() -> None:
+    file_path = BASE_DIR / "data" / "processed" / "price_list.csv"
     db_url = settings.sqlite.db_path
     print(db_url)
-    '''retrieval_tool = create_retriever_tool(
-        retriever=retriever,
-        name="DIOConsultPricesRetriever",
-        description=read_txt(settings.prompts.retrival_description_path)
-    )'''
     retrieval_tool = RetrievalTool(retriever)
-    prompt_template = """
-    **Роль**:
-    Ты менеджер компании ДИО-Консалт, который должен консультировать пользователей по продуктам компании 1с.
-    """
+    search_product_tool = SearchProductTool(file_path)
+    prompt_template = read_txt(settings.prompts.system_path)
     agent = ReACTAgent(
         db_url=db_url,
-        tools=[retrieval_tool],
+        tools=[retrieval_tool, search_product_tool],
         prompt_template=prompt_template,
         model=model
     )
-    thread_id = "19"
+    thread_id = "2"
     while True:
         query = input("User: ")
         if query == "q":

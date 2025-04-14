@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 
 
 class RetrievalToolInput(BaseModel):
-    query: str = Field(..., description="Запрос для поиска релевантных документов")
+    query: str = Field(..., description="Запрос для поиска релевантных документов с продуктами 1С")
 
 
 class RetrievalTool(BaseTool):
