@@ -8,8 +8,8 @@ from typing import List, Optional
 from fastapi import UploadFile
 
 from src.misc.files import get_filename, get_file_extension, awrite_bytes
-from src.services.upload_file_saver.base_upload_file_saver import BaseUploadFileSaver
-from src.services.upload_file_saver.constants import UPLOADED_FILES_DIR, ALLOWED_EXTENSIONS
+from src.services.upload_file_savers.base_upload_file_saver import BaseUploadFileSaver
+from src.services.upload_file_savers.constants import UPLOADED_FILES_DIR, ALLOWED_EXTENSIONS
 
 
 logger = logging.getLogger(__name__)
