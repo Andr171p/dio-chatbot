@@ -8,7 +8,7 @@ from langchain_core.retrievers import BaseRetriever
 
 from src.ai_agent.utils import format_documents
 
-from src.misc.file_readers import read_txt
+from src.misc.files import read_txt
 from src.settings import settings
 
 
