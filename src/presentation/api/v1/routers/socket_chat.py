@@ -1,4 +1,10 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import (
+    APIRouter,
+    WebSocket,
+    WebSocketDisconnect,
+    Request
+)
+from fastapi.templating import Jinja2Templates
 from dishka.integrations.fastapi import FromDishka, DishkaRoute, inject
 
 from src.core.use_cases import ChatAssistant
@@ -6,11 +12,19 @@ from src.presentation.api.v1.schemas import ChatResponse
 from src.services.connection_managers import BaseConnectionManager
 
 
+templates = Jinja2Templates(directory="templates")
+
+
 socket_chat_router = APIRouter(
     prefix="/api/v1/ws/chat",
     tags=["Chat with AI assistant in real time"],
     route_class=DishkaRoute
 )
+
+
+@socket_chat_router.get("/{chat_id}/view")
+async def chat_view(request: Request, chat_id: str):
+    return templates.TemplateResponse("chat.html", {"request": request, "chat_id": chat_id})
 
 
 @socket_chat_router.websocket("/{chat_id}")

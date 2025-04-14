@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant Chat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {"50":"#eff6ff","100":"#dbeafe","200":"#bfdbfe","300":"#93c5fd","400":"#60a5fa","500":"#3b82f6","600":"#2563eb","700":"#1d4ed8","800":"#1e40af","900":"#1e3a8a"}
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .message-container {
+            scrollbar-width: thin;
+            scrollbar-color: #3b82f6 #f1f1f1;
+        }
+        .message-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        .message-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .message-container::-webkit-scrollbar-thumb {
+            background-color: #3b82f6;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen flex flex-col">
+    {% block content %}{% endblock %}
+    <script>
+        function scrollToBottom() {
+            const container = document.getElementById('messages');
+            container.scrollTop = container.scrollHeight;
+        }
+    </script>
+</body>
+</html>
