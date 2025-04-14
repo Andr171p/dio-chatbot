@@ -1,9 +1,14 @@
 from dishka import make_async_container
 
-from src.di.providers import LangchainProvider, ChatBotProvider
+from src.di.providers import (
+    LangchainProvider,
+    ChatBotProvider,
+    ServiceProvider
+)
 
 
 container = make_async_container(
     LangchainProvider(),
-    ChatBotProvider()
+    ChatBotProvider(),
+    ServiceProvider()
 )
