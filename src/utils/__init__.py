@@ -1,5 +1,5 @@
 __all__ = (
-    "FileLoader"
+    "FileToDocumentsLoader"
 )
 
-from src.utils.file_loader import FileLoader
+from src.utils.file_to_documents_loader import FileToDocumentsLoader
