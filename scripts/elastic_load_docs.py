@@ -16,13 +16,18 @@ logging.basicConfig(level=logging.INFO)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-FILE_PATH = BASE_DIR / "raw" / "price_1c.xls"
+FILE_PATH = BASE_DIR / "data" / "processed" / "price_list.txt"
 
-loader = UnstructuredExcelLoader(FILE_PATH)
+# loader = UnstructuredExcelLoader(FILE_PATH)
 
-documents = loader.load()
+# documents = loader.load()
 
-text = documents[0].page_content
+# text = documents[0].page_content
+
+with open(FILE_PATH, encoding="utf-8") as file:
+    text = file.read()
+
+log.info(f"Длина текста: {len(text)}")
 
 text_splitter = RecursiveCharacterTextSplitter(
     chunk_size=600,
