@@ -56,6 +56,10 @@ class PromptsSettings(BaseSettings):
     retrival_description_path: Path = BASE_DIR / "prompts" / "retrieval_description.txt"
 
 
+class FilesSettings(BaseSettings):
+    price_list_path: Path = BASE_DIR / "data" / "processed" / "price_list.csv"
+
+
 class Settings(BaseSettings):
     elasticsearch: ElasticsearchSettings = ElasticsearchSettings()
     postgres: PostgresSettings = PostgresSettings()
@@ -64,6 +68,7 @@ class Settings(BaseSettings):
     giga_chat: GigaChatSettings = GigaChatSettings()
     yandex_gpt: YandexGPTSettings = YandexGPTSettings()
     prompts: PromptsSettings = PromptsSettings()
+    files: FilesSettings = FilesSettings()
 
 
 settings = Settings()
