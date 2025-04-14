@@ -23,7 +23,6 @@ class FinalizeNode(BaseNode):
             final_answer = clarifying_question
         return final_answer
 
-    @message_saver
     async def ainvoke(self, state: State) -> dict[str, Any]:
         log.info("---FINALIZE---")
         generation: Optional[str] = state.get("generation")

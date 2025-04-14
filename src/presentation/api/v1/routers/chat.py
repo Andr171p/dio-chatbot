@@ -22,5 +22,5 @@ async def answer(
         asking_user: AskingUser,
         chat_assistant: FromDishka[ChatAssistant]
 ) -> ChatResponse:
-    assistant_message = await chat_assistant.answer(**asking_user.model_dump())
-    return ChatResponse.from_assistant_message(assistant_message)
+    message = await chat_assistant.answer(**asking_user.model_dump())
+    return ChatResponse(role="assistant", message=message)
