@@ -9,7 +9,7 @@ from src.presentation.api.v1.routers import (
 )
 
 
-def get_fastapi_app() -> FastAPI:
+def create_fastapi_app() -> FastAPI:
     app = FastAPI()
     app.include_router(chat_router)
     app.include_router(socket_chat_router)

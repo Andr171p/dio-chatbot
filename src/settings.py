@@ -60,6 +60,10 @@ class FilesSettings(BaseSettings):
     price_list_path: Path = BASE_DIR / "data" / "processed" / "price_list.csv"
 
 
+class BotSettings(BaseSettings):
+    token: str = os.getenv("BOT_TOKEN")
+
+
 class Settings(BaseSettings):
     elasticsearch: ElasticsearchSettings = ElasticsearchSettings()
     postgres: PostgresSettings = PostgresSettings()
@@ -69,6 +73,7 @@ class Settings(BaseSettings):
     yandex_gpt: YandexGPTSettings = YandexGPTSettings()
     prompts: PromptsSettings = PromptsSettings()
     files: FilesSettings = FilesSettings()
+    bot: BotSettings = BotSettings()
 
 
 settings = Settings()
