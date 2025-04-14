@@ -9,4 +9,5 @@ class ChatAssistant:
         return await self._ai_agent.generate(chat_id, user_message)
 
     async def chat(self, chat_id: str, user_message: str) -> str:
+        """This method will implement streaming chat"""
         ...

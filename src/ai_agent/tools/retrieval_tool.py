@@ -1,18 +1,21 @@
 import logging
 
-from typing import Any, Type, Optional
+from typing import Any, Type, Optional, List
 
 from pydantic import BaseModel, Field
 from langchain_core.tools import BaseTool
+from langchain_core.documents import Document
 from langchain_core.retrievers import BaseRetriever
-
-from src.ai_agent.utils import format_documents
 
 from src.misc.files import read_txt
 from src.settings import settings
 
 
 log = logging.getLogger(__name__)
+
+
+def format_documents(documents: List[Document]) -> str:
+    return "\n\n".join([document.page_content for document in documents])
 
 
 class RetrievalToolInput(BaseModel):
@@ -31,11 +34,9 @@ class RetrievalTool(BaseTool):
     def _run(self, query: str) -> str:
         log.info("---RETRIEVE---")
         documents = self._retriever.invoke(query)
-        context = format_documents(documents)
-        return context
+        return format_documents(documents)
 
     async def _arun(self, query: str) -> str:
         log.info("---RETRIEVE---")
         documents = await self._retriever.ainvoke(query)
-        context = format_documents(documents)
-        return context
+        return format_documents(documents)
